@@ -1,0 +1,22 @@
+<svg width="400" height="100" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient Definition -->
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4F8EF7"/>
+      <stop offset="100%" stop-color="#A16CE8"/>
+    </linearGradient>
+    <!-- AI Assistant Symbol -->
+    <symbol id="assistant-icon" viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="30" fill="url(#grad)" />
+      <path d="M22 28h20v4H22v-4zm0 8h14v4H22v-4z" fill="#fff"/>
+    </symbol>
+  </defs>
+
+  <!-- Icon Usage -->
+  <use href="#assistant-icon" x="0" y="0" width="64" height="64" />
+
+  <!-- Text -->
+  <text x="80" y="45" font-family="Inter, sans-serif" font-size="32" fill="url(#grad)" font-weight="600">
+    NextGenHelper
+  </text>
+</svg>
