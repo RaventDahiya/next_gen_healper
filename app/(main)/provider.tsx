@@ -1,9 +1,10 @@
 "use client";
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contex/AuthContext";
 import { useRouter } from "next/navigation";
 import { useConvex } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { AssistantContext } from "@/contex/AssistantContext";
 
 function Provider({
   children,
@@ -13,6 +14,7 @@ function Provider({
   const { user, isLoading, setUser } = useContext(AuthContext);
   const router = useRouter();
   const convex = useConvex();
+  const [assistant, setAssistant] = useState(null);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -30,8 +32,8 @@ function Provider({
           });
           if (result && Object.keys(result).length > 0) {
             setUser({
-              ...user, 
-              ...result, 
+              ...user,
+              ...result,
             });
           }
         } catch (error) {
@@ -54,7 +56,13 @@ function Provider({
   }
 
   if (user) {
-    return <div>{children}</div>;
+    return (
+      <div>
+        <AssistantContext.Provider value={{ assistant, setAssistant }}>
+          {children}
+        </AssistantContext.Provider>
+      </div>
+    );
   }
 
   return null;

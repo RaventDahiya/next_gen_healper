@@ -9,7 +9,7 @@ function Header() {
   if (!user) return null;
 
   return (
-    <header className="flex items-center justify-between px-6 py-4 shadow-sm bg-white dark:bg-gray-900">
+    <div className="flex fixed items-center justify-between px-6 py-4 shadow-sm bg-white dark:bg-gray-900">
       <Image src="/logo.svg" alt="Logo" width={300} height={300} />
       {user.picture && (
         <Image
@@ -20,7 +20,7 @@ function Header() {
           className="rounded-full object-cover"
         />
       )}
-    </header>
+    </div>
   );
 }
 
