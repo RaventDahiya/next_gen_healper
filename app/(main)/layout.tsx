@@ -1,6 +1,6 @@
 import React from "react";
 import Provider from "./provider";
-import Header from "./_conponets/Header";
+import Header from "./_components/Header";
 function WorkspaceLayout({
   children,
 }: Readonly<{

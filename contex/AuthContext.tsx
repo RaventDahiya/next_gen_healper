@@ -1,8 +1,56 @@
 import { createContext, useState, useEffect, useRef } from "react";
 import { GetAuthUserData } from "@/services/GlobalApi";
 import { useRouter } from "next/navigation";
+import { Id } from "../convex/_generated/dataModel";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+
+// Function to get or create user in Convex
+const getOrCreateUserInConvex = async (userData: {
+  name: string;
+  email: string;
+  picture: string;
+}) => {
+  try {
+    // First try to get the existing user
+    const getUserResponse = await fetch("/api/getUser", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: userData.email }),
+    });
+
+    if (getUserResponse.ok) {
+      const user = await getUserResponse.json();
+      if (user) {
+        return user;
+      }
+    }
+
+    // If user doesn't exist, create a new one
+    const createUserResponse = await fetch("/api/createUser", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(userData),
+    });
+
+    if (createUserResponse.ok) {
+      const newUser = await createUserResponse.json();
+      return newUser;
+    }
+
+    throw new Error("Failed to get or create user");
+  } catch (error) {
+    console.error("Error getting or creating user in Convex:", error);
+    throw error;
+  }
+};
 
 interface User {
+  _id?: Id<"user">;
   name?: string;
   email?: string;
   picture?: string;
@@ -59,11 +107,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log("User data from Google:", userData);
       if (userData?.email) {
         console.log("Setting user with Google data");
-        setUser({
-          name: userData.name,
-          email: userData.email,
-          picture: userData.picture,
-        });
+        // Get or create user in Convex to ensure we have the _id
+        try {
+          const convexUser = await getOrCreateUserInConvex({
+            name: userData.name,
+            email: userData.email,
+            picture: userData.picture,
+          });
+
+          console.log("Setting user with Convex data:", convexUser);
+          setUser({
+            _id: convexUser._id,
+            name: userData.name,
+            email: userData.email,
+            picture: userData.picture,
+          });
+        } catch (error) {
+          console.error("Failed to get or create user in Convex:", error);
+          // Still set the user with Google data, but without _id
+          setUser({
+            name: userData.name,
+            email: userData.email,
+            picture: userData.picture,
+          });
+        }
       } else {
         // If we get here, the token is invalid or expired
         console.log(

@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { AuthContext } from "@/contex/AuthContext";
 import { useRouter } from "next/navigation";
 import { useConvex } from "convex/react";
@@ -10,70 +10,42 @@ function Provider({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { user, isLoading, checkAuth, setUser } = useContext(AuthContext);
+  const { user, isLoading, setUser } = useContext(AuthContext);
   const router = useRouter();
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const convex = useConvex();
 
   useEffect(() => {
-    const verifyAuth = async () => {
-      await checkAuth();
-      setIsCheckingAuth(false);
-    };
-
-    verifyAuth();
-  }, [checkAuth]);
-
-  useEffect(() => {
-    console.log("Checking redirect condition", {
-      isLoading,
-      isCheckingAuth,
-      user,
-    });
-    if (!isLoading && !isCheckingAuth) {
-      if (!user) {
-        console.log("Redirecting to sign-in because no user");
-        router.replace("/sign-in");
-      }
+    if (!isLoading && !user) {
+      router.replace("/sign-in");
     }
-  }, [user, isLoading, isCheckingAuth, router]);
+  }, [user, isLoading, router]);
 
   // Fetch user data from Convex when user email is available
   useEffect(() => {
     const fetchUserData = async () => {
       if (user?.email) {
-        console.log("Fetching user data from Convex for email:", user.email);
         try {
           const result = await convex.query(api.users.GetUser, {
             email: user.email,
           });
-          console.log("User data from Convex:", result);
-          // Only update user state if we got a valid result
-          // But don't override existing user data with undefined/null
           if (result && Object.keys(result).length > 0) {
-            console.log("Setting user with Convex data");
-            // Merge Convex data with existing Google data
             setUser({
-              ...user, // Keep existing Google data
-              ...result, // Add/override with Convex data
+              ...user, 
+              ...result, 
             });
-          } else {
-            console.log(
-              "No Convex user data found, keeping existing user data"
-            );
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
-          console.log("Error fetching Convex data, keeping existing user data");
         }
       }
     };
 
-    fetchUserData();
-  }, [user?.email, convex, setUser]);
+    if (!isLoading) {
+      fetchUserData();
+    }
+  }, [user?.email, convex, setUser, isLoading]);
 
-  // Show nothing while checking auth
-  if (isLoading || isCheckingAuth) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         Checking authentication...
@@ -81,13 +53,11 @@ function Provider({
     );
   }
 
-  // If user is not authenticated, don't render children
-  if (!user || !user.email) {
-    console.log("No user or email, not rendering children");
-    return null;
+  if (user) {
+    return <div>{children}</div>;
   }
 
-  return <div>{children}</div>;
+  return null;
 }
 
 export default Provider;
