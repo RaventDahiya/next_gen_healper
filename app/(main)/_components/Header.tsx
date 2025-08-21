@@ -11,7 +11,7 @@ function Header() {
   return (
     <div className="flex fixed items-center justify-between px-6 py-4 shadow-sm bg-white dark:bg-gray-900">
       <Image src="/logo.svg" alt="Logo" width={300} height={300} />
-      {user.picture && (
+      {user.picture ? (
         <Image
           src={user.picture}
           alt="User profile"
@@ -19,6 +19,10 @@ function Header() {
           height={40}
           className="rounded-full object-cover"
         />
+      ) : (
+        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+          <span className="text-gray-500 text-xl">?</span>
+        </div>
       )}
     </div>
   );
