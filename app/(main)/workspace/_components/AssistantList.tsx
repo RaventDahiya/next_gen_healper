@@ -10,6 +10,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { ASSISTANT } from "../../ai-assistants/page";
 import Image from "next/image";
 import { AssistantContext } from "@/contex/AssistantContext";
+import { BlurFade } from "@/components/magicui/blur-fade";
 
 function AssistantList() {
   const [assistantList, setAssistantList] = useState<ASSISTANT[]>([]);
@@ -20,7 +21,7 @@ function AssistantList() {
 
   useEffect(() => {
     user && GetAllUserAssistants();
-  }, [user]);
+  }, [user && assistant == null]);
 
   const GetAllUserAssistants = async () => {
     if (!user || !user._id) return;
@@ -48,7 +49,7 @@ function AssistantList() {
   };
 
   return (
-    <div className="p-5 bg-gray-100 dark:bg-gray-800 border-r-[1px] h-screen relative overflow-y-auto">
+    <div className="p-5 bg-gray-100 dark:bg-gray-800 border-r-[1px] h-full relative">
       <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
         Your Personal AI Assistants
       </h2>
@@ -66,64 +67,65 @@ function AssistantList() {
         {assistantList.map((assistant_, index) => {
           const selected = isSelected(assistant_);
           return (
-            <div
-              key={assistant_.id || index} // Use ID as key if available
-              className={`p-3 rounded-xl shadow-sm transition-all duration-300 ease-in-out flex items-center gap-4 cursor-pointer transform hover:scale-[1.02] hover:shadow-lg hover:-translate-y-1 ${
-                selected
-                  ? "bg-blue-100 dark:bg-blue-900 shadow-md border-2 border-blue-300 dark:border-blue-600" // Enhanced selected state
-                  : "bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-              }`}
-              onClick={() => handleAssistantSelect(assistant_)}
-            >
-              <div className="relative">
-                <Image
-                  src={assistant_.image || "/placeholder.png"}
-                  alt={assistant_.name}
-                  width={60}
-                  height={60}
-                  className="rounded-xl w-16 h-16 object-cover shadow-md transition-transform duration-300 ease-in-out hover:scale-105"
-                />
-                <div className="absolute inset-0 rounded-xl bg-black opacity-0 hover:opacity-5 transition-opacity duration-300"></div>
-              </div>
-              <div className="flex-1">
-                <h3
-                  className={`font-semibold transition-colors duration-200 ${
-                    selected
-                      ? "text-blue-700 dark:text-blue-300"
-                      : "text-gray-800 dark:text-gray-200"
-                  }`}
-                >
-                  {assistant_.name}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 text-sm transition-colors duration-200">
-                  {assistant_.title}
-                </p>
-              </div>
+            <BlurFade key={assistant_.id || index} delay={0.25 * index} inView>
               <div
-                className={`transition-opacity duration-300 ${
-                  selected ? "opacity-100" : "opacity-0 hover:opacity-100"
-                } text-gray-400`}
+                className={`p-3 rounded-xl shadow-sm transition-all duration-300 ease-in-out flex items-center gap-4 cursor-pointer transform hover:scale-[1.02] hover:shadow-lg hover:-translate-y-1 ${
+                  selected
+                    ? "bg-blue-100 dark:bg-blue-900 shadow-md border-2 border-blue-300 dark:border-blue-600" // Enhanced selected state
+                    : "bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                }`}
+                onClick={() => handleAssistantSelect(assistant_)}
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
+                <div className="relative">
+                  <Image
+                    src={assistant_.image || "/placeholder.png"}
+                    alt={assistant_.name}
+                    width={60}
+                    height={60}
+                    className="rounded-xl w-16 h-16 object-cover shadow-md transition-transform duration-300 ease-in-out hover:scale-105"
                   />
-                </svg>
+                  <div className="absolute inset-0 rounded-xl bg-black opacity-0 hover:opacity-5 transition-opacity duration-300"></div>
+                </div>
+                <div className="flex-1">
+                  <h3
+                    className={`font-semibold transition-colors duration-200 ${
+                      selected
+                        ? "text-blue-700 dark:text-blue-300"
+                        : "text-gray-800 dark:text-gray-200"
+                    }`}
+                  >
+                    {assistant_.name}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm transition-colors duration-200">
+                    {assistant_.title}
+                  </p>
+                </div>
+                <div
+                  className={`transition-opacity duration-300 ${
+                    selected ? "opacity-100" : "opacity-0 hover:opacity-100"
+                  } text-gray-400`}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </div>
               </div>
-            </div>
+            </BlurFade>
           );
         })}
       </div>
 
-      <div className="absolute bottom-5 left-5 right-5 p-3 rounded-xl bg-white dark:bg-gray-700 shadow-md flex items-center gap-4">
+      <div className="mt-5 p-3 rounded-xl bg-white dark:bg-gray-700 shadow-md flex items-center gap-4">
         <Image
           src={user?.picture || "/placeholder.png"}
           alt="user_img"

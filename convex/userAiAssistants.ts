@@ -37,13 +37,22 @@ export const updateUserAssistant = mutation({
   args: {
     id: v.id("userAiAssistants"),
     userInstruction: v.string(),
-    aiModelId: v.string(),
+    aiModelId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const result = await ctx.db.patch(args.id, {
       userInstruction: args.userInstruction,
-      aiModelId: args.aiModelId,
+      ...(args.aiModelId !== undefined && { aiModelId: args.aiModelId }),
     });
     return result;
+  },
+});
+
+export const deleteUserAssistant = mutation({
+  args: {
+    id: v.id("userAiAssistants"),
+  },
+  handler: async (ctx, args) => {
+    const result = await ctx.db.delete(args.id);
   },
 });

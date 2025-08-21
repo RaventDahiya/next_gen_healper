@@ -81,13 +81,14 @@ export default function AIAssistants() {
         uid: user._id,
       });
       console.log(result);
+      router.push("/workspace");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="px-6 py-12 md:px-12 lg:px-24 xl:px-32">
+    <div className="px-6 py-12 md:px-12 lg:px-24 xl:px-32 pt-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 space-y-4 md:space-y-0">
         <div>
           <BlurFade delay={0.25 * 1 * 0.05} inView>
