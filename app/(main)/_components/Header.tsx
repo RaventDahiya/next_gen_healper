@@ -1,6 +1,7 @@
 "use client";
 import React, { useContext, useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { AuthContext } from "@/contex/AuthContext";
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
@@ -15,25 +16,55 @@ import { useRouter } from "next/navigation";
 
 function Header() {
   const { user } = useContext(AuthContext);
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // When mounted on client, now we can show the UI
   useEffect(() => setMounted(true), []);
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <header className="fixed top-0 left-0 right-0 h-20 flex items-center justify-between px-6 shadow-sm bg-white dark:bg-gray-900 z-50 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center py-2">
+          <img
+            src="/nextgenhelper_ai_logo.png"
+            alt="NextGenHelper AI Assistant"
+            className="h-16 w-auto object-contain"
+          />
+        </div>
 
-  // Render a placeholder to avoid hydration mismatch
+        <div className="flex items-center space-x-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() =>
+              setTheme(resolvedTheme === "dark" ? "light" : "dark")
+            }
+            className="rounded-full"
+            disabled={!mounted}
+          >
+            {resolvedTheme === "dark" ? (
+              <Sun className="h-5 w-5 text-yellow-500" />
+            ) : (
+              <Moon className="h-5 w-5 text-gray-700" />
+            )}
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+          <Button asChild>
+            <Link href="/sign-in">Sign In</Link>
+          </Button>
+        </div>
+      </header>
+    );
+  }
+
   if (!mounted) {
     return (
-      <div className="flex fixed items-center justify-between px-6 py-4 shadow-sm bg-white dark:bg-gray-900 w-full z-10">
-        <div className="flex items-center space-x-2">
-          <Image
-            src="/logo.svg"
-            alt="Logo"
-            width={100}
-            height={100}
-            className="h-8 w-auto"
+      <header className="fixed top-0 left-0 right-0 h-20 flex items-center justify-between px-6 shadow-sm bg-white dark:bg-gray-900 z-50 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center py-2">
+          <img
+            src="/nextgenhelper_ai_logo.png"
+            alt="NextGenHelper AI Assistant"
+            className="h-16 w-auto object-contain"
           />
         </div>
         <div className="flex items-center space-x-4">
@@ -46,7 +77,7 @@ function Header() {
             <Sun className="h-5 w-5 text-yellow-500" />
             <span className="sr-only">Toggle theme</span>
           </Button>
-          {user.picture ? (
+          {user?.picture ? (
             <Image
               src={user.picture}
               alt="User profile"
@@ -60,29 +91,27 @@ function Header() {
             </div>
           )}
         </div>
-      </div>
+      </header>
     );
   }
 
   return (
-    <div className="flex fixed items-center justify-between px-6 py-4 shadow-sm bg-white dark:bg-gray-900 w-full z-10">
-      <div className="flex items-center">
-        <Image
-          src="/logo.svg"
-          alt="Logo"
-          width={150}
-          height={150}
-          className="h-10 w-auto"
+    <header className="fixed top-0 left-0 right-0 h-20 flex items-center justify-between px-6 shadow-sm bg-white dark:bg-gray-900 z-50 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex items-center py-2">
+        <img
+          src="/nextgenhelper_ai_logo.png"
+          alt="NextGenHelper AI Assistant"
+          className="h-16 w-auto object-contain"
         />
       </div>
       <div className="flex items-center space-x-4">
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
           className="rounded-full"
         >
-          {theme === "dark" ? (
+          {resolvedTheme === "dark" ? (
             <Sun className="h-5 w-5 text-yellow-500" />
           ) : (
             <Moon className="h-5 w-5 text-gray-700" />
@@ -91,7 +120,7 @@ function Header() {
         </Button>
         <UserDropdown user={user} />
       </div>
-    </div>
+    </header>
   );
 }
 
@@ -99,18 +128,15 @@ function UserDropdown({ user }: { user: any }) {
   const router = useRouter();
 
   const handleLogout = () => {
-    // Remove the user token from localStorage
     localStorage.removeItem("user_token");
-    // Redirect to home page
     router.push("/");
-    // Reload the page to clear the user context
     window.location.reload();
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        {user.picture ? (
+        {user?.picture ? (
           <button className="rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer transition-transform duration-200 hover:scale-105">
             <Image
               src={user.picture}

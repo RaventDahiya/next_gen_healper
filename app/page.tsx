@@ -9,6 +9,7 @@ import { AuthContext } from "@/contex/AuthContext";
 import Image from "next/image";
 import { BlurFade } from "@/components/magicui/blur-fade";
 import Link from "next/link";
+import Header from "./(main)/_components/Header";
 
 export default function Home() {
   const { theme, setTheme } = useTheme();
@@ -31,29 +32,7 @@ export default function Home() {
   if (!mounted) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
-        {/* Header */}
-        <header className="flex justify-between items-center p-6">
-          <div className="flex items-center space-x-2">
-            <Image
-              src="/logo.svg"
-              alt="NextGenHelper Logo"
-              width={100}
-              height={100}
-            />
-          </div>
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full opacity-50"
-              disabled
-            >
-              <Sun className="h-5 w-5 text-yellow-500" />
-              <span className="sr-only">Toggle theme</span>
-            </Button>
-            <Button disabled>Sign In</Button>
-          </div>
-        </header>
+        <Header />
 
         {/* Hero Section */}
         <main className="container mx-auto px-4 py-16 md:py-24">
@@ -186,44 +165,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
-      {/* Header */}
-      <header className="flex justify-between items-center p-6">
-        <div className="flex items-center space-x-2">
-          <Image
-            src="/logo.svg"
-            alt="NextGenHelper Logo"
-            width={40}
-            height={40}
-          />
-          <span className="text-xl font-bold text-gray-800 dark:text-white">
-            NextGenHelper
-          </span>
-        </div>
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="rounded-full"
-          >
-            {theme === "dark" ? (
-              <Sun className="h-5 w-5 text-yellow-500" />
-            ) : (
-              <Moon className="h-5 w-5 text-gray-700" />
-            )}
-            <span className="sr-only">Toggle theme</span>
-          </Button>
-          {user ? (
-            <Button asChild>
-              <Link href="/ai-assistants">Dashboard</Link>
-            </Button>
-          ) : (
-            <Button asChild>
-              <Link href="/sign-in">Sign In</Link>
-            </Button>
-          )}
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <main className="container mx-auto px-4 py-16 md:py-24">
