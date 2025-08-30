@@ -113,9 +113,8 @@ export default function AIAssistants() {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
         {AiAssistantsList.map((assistant, index) => (
-          <BlurFade key={assistant.image} delay={0.25 + index * 0.05} inView>
+          <BlurFade key={assistant.id} delay={0.25 + index * 0.05} inView>
             <div
-              key={assistant.id}
               className="group bg-white dark:bg-gray-800 rounded-xl shadow hover:shadow-lg transition-shadow duration-200 overflow-hidden "
               onClick={() => onSelect(assistant)}
             >

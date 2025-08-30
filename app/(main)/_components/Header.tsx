@@ -10,8 +10,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { LogOut, RefreshCw, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 function Header() {
@@ -28,27 +31,28 @@ function Header() {
           <img
             src="/nextgenhelper_ai_logo.png"
             alt="NextGenHelper AI Assistant"
-            className="h-16 w-auto object-contain"
+            className="h-50 w-auto object-contain"
           />
         </div>
 
         <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() =>
-              setTheme(resolvedTheme === "dark" ? "light" : "dark")
-            }
-            className="rounded-full"
-            disabled={!mounted}
-          >
-            {resolvedTheme === "dark" ? (
-              <Sun className="h-5 w-5 text-yellow-500" />
-            ) : (
-              <Moon className="h-5 w-5 text-gray-700" />
-            )}
-            <span className="sr-only">Toggle theme</span>
-          </Button>
+          {mounted && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                setTheme(resolvedTheme === "dark" ? "light" : "dark")
+              }
+              className="rounded-full"
+            >
+              {resolvedTheme === "dark" ? (
+                <Sun className="h-5 w-5 text-yellow-500" />
+              ) : (
+                <Moon className="h-5 w-5 text-gray-700" />
+              )}
+              <span className="sr-only">Toggle theme</span>
+            </Button>
+          )}
           <Button asChild>
             <Link href="/sign-in">Sign In</Link>
           </Button>
@@ -64,7 +68,7 @@ function Header() {
           <img
             src="/nextgenhelper_ai_logo.png"
             alt="NextGenHelper AI Assistant"
-            className="h-16 w-auto object-contain"
+            className="h-50 w-auto object-contain"
           />
         </div>
         <div className="flex items-center space-x-4">
@@ -101,7 +105,7 @@ function Header() {
         <img
           src="/nextgenhelper_ai_logo.png"
           alt="NextGenHelper AI Assistant"
-          className="h-16 w-auto object-contain"
+          className="h-50 w-auto object-contain"
         />
       </div>
       <div className="flex items-center space-x-4">
@@ -133,6 +137,11 @@ function UserDropdown({ user }: { user: any }) {
     window.location.reload();
   };
 
+  const handleSwitchAccount = () => {
+    localStorage.removeItem("user_token");
+    router.push("/sign-in");
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -154,10 +163,68 @@ function UserDropdown({ user }: { user: any }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-56 transition-all duration-300 ease-in-out"
+        className="w-72 p-2 transition-all duration-300 ease-in-out"
       >
-        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-          Logout
+        <DropdownMenuLabel className="p-0 font-normal">
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 mb-2">
+            {user?.picture ? (
+              <Image
+                src={user.picture}
+                alt="User profile"
+                width={48}
+                height={48}
+                className="rounded-full object-cover ring-2 ring-indigo-200 dark:ring-indigo-700"
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
+                <User className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                {user?.name || "User"}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                {user?.email || "user@example.com"}
+              </p>
+              <div className="flex items-center gap-1 mt-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  {user?.orderId ? "Pro Plan" : "Free Plan"}
+                </span>
+              </div>
+            </div>
+          </div>
+        </DropdownMenuLabel>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem
+          onClick={handleSwitchAccount}
+          className="cursor-pointer p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        >
+          <RefreshCw className="w-4 h-4 mr-3 text-blue-500" />
+          <div>
+            <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+              Switch Account
+            </p>
+            <p className="text-xs text-gray-500">
+              Sign in with different account
+            </p>
+          </div>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
+          onClick={handleLogout}
+          className="cursor-pointer p-3 rounded-lg hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
+        >
+          <LogOut className="w-4 h-4 mr-3 text-red-500" />
+          <div>
+            <p className="text-sm font-medium text-red-600 dark:text-red-400">
+              Sign Out
+            </p>
+            <p className="text-xs text-gray-500">Sign out of your account</p>
+          </div>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

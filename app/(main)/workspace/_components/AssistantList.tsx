@@ -48,6 +48,17 @@ function AssistantList() {
     return assistant?.id === assistantItem.id;
   };
 
+  // Filter out duplicate assistants by id
+  const uniqueAssistants = Object.values(
+    assistantList.reduce(
+      (acc, curr) => {
+        acc[curr.id] = curr;
+        return acc;
+      },
+      {} as { [id: number]: ASSISTANT }
+    )
+  );
+
   return (
     <div className="p-5 bg-gray-100 dark:bg-gray-800 border-r-[1px] h-full relative">
       <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
@@ -64,14 +75,14 @@ function AssistantList() {
       />
 
       <div className="mt-5 space-y-3">
-        {assistantList.map((assistant_, index) => {
+        {uniqueAssistants.map((assistant_, index) => {
           const selected = isSelected(assistant_);
           return (
             <BlurFade key={assistant_.id || index} delay={0.25 * index} inView>
               <div
                 className={`p-3 rounded-xl shadow-sm transition-all duration-300 ease-in-out flex items-center gap-4 cursor-pointer transform hover:scale-[1.02] hover:shadow-lg hover:-translate-y-1 ${
                   selected
-                    ? "bg-blue-100 dark:bg-blue-900 shadow-md border-2 border-blue-300 dark:border-blue-600" // Enhanced selected state
+                    ? "bg-blue-100 dark:bg-blue-900 shadow-md border-2 border-blue-300 dark:border-blue-600"
                     : "bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                 }`}
                 onClick={() => handleAssistantSelect(assistant_)}

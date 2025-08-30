@@ -55,6 +55,26 @@ function Settings() {
     toast("Assistant Deleted");
     setAssistant(null);
   };
+  // Find the selected model object
+  const defaultModelValue = "google/gemini-2.0-flash-exp:free";
+  // Fallback: if aiModelId is the display name, use the OpenRouter value
+  let selectedModelValue = assistant?.aiModelId || defaultModelValue;
+  // If the value is the display name, map it to OpenRouter value
+  const displayNameToOpenRouter = (name: string) => {
+    const found = AiModelOptions.find((m) => m.name === name);
+    return found ? found.OpenRouter : name;
+  };
+  if (
+    selectedModelValue &&
+    !AiModelOptions.some((m) => m.OpenRouter === selectedModelValue)
+  ) {
+    // Try to map display name to OpenRouter value
+    selectedModelValue = displayNameToOpenRouter(selectedModelValue);
+  }
+  const selectedModel = AiModelOptions.find(
+    (model) => model.OpenRouter === selectedModelValue
+  );
+
   return (
     assistant && (
       <div className="p-5 h-full pb-24">
@@ -92,10 +112,15 @@ function Settings() {
             inView
           >
             <Select
+              value={selectedModelValue}
               onValueChange={(value) => onHandleInputChange("aiModelId", value)}
             >
-              <SelectTrigger className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200">
-                <SelectValue placeholder="Select Model" />
+              <SelectTrigger className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 cursor-pointer">
+                <SelectValue
+                  placeholder={
+                    selectedModel ? selectedModel.name : "Select Model"
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
                 {AiModelOptions.map((model, index) => (

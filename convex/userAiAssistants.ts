@@ -7,15 +7,29 @@ export const InsertSelectedAssistants = mutation({
     uid: v.id("user"),
   },
   handler: async (ctx, args) => {
-    const insertedIds = await Promise.all(
-      args.records.map(async (record: any) => {
-        return await ctx.db.insert("userAiAssistants", {
+    const insertedIds = [];
+    // Default to OpenRouter value for Gemini 2.0 Flash
+    const defaultModelValue = "google/gemini-2.0-flash-exp:free";
+    for (const record of args.records) {
+      // Check if assistant with same id and uid already exists
+      const existing = await ctx.db
+        .query("userAiAssistants")
+        .filter((q) =>
+          q.and(
+            q.eq(q.field("uid"), args.uid),
+            q.eq(q.field("id"), record.id.toString())
+          )
+        )
+        .collect();
+      if (existing.length === 0) {
+        const insertedId = await ctx.db.insert("userAiAssistants", {
           ...record,
-          aiModelId: "Google: Gemini 2.0 Flash",
+          aiModelId: defaultModelValue,
           uid: args.uid,
         });
-      })
-    );
+        insertedIds.push(insertedId);
+      }
+    }
     return insertedIds;
   },
 });

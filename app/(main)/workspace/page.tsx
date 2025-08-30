@@ -11,7 +11,7 @@ function workspace() {
           {/* assistant list */}
           <AssistantList />
         </div>
-        <div className="md:col-span-4 lg:col-span-3 h-full overflow-y-auto">
+        <div className="md:col-span-4 lg:col-span-3 h-full overflow-hidden">
           {/* chat ui */}
           <ChatUi />
         </div>
