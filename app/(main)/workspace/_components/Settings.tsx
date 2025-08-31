@@ -84,9 +84,9 @@ function Settings() {
             <Image
               src={assistant?.image}
               alt="assistant_img"
-              width={100}
-              height={100}
-              className="rounded-xl h-[80px] w-[80px]"
+              width={80}
+              height={80}
+              className="rounded-xl h-20 w-20 object-cover"
             />
           </BlurFade>
           <BlurFade key={`assistant-${assistant._id}-info`} delay={0} inView>
@@ -136,7 +136,7 @@ function Settings() {
                           alt="model_img"
                           width={20}
                           height={20}
-                          className="rounded-xl h-[20px] w-[20px]"
+                          className="rounded-xl h-5 w-5 object-cover"
                         />
                       </BlurFade>
                       <BlurFade

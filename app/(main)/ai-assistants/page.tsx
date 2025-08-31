@@ -12,7 +12,7 @@ import { AuthContext } from "@/contex/AuthContext";
 import { Loader2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 export type ASSISTANT = {
-  id: number;
+  id: number | string; // Support both number and string IDs
   name: string;
   title: string;
   image: string;
