@@ -1,7 +1,7 @@
 "use client";
 import { AssistantContext } from "@/contex/AssistantContext";
 import Image from "next/image";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -23,15 +23,36 @@ import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 import ConfermationAlert from "./ConfermationAlert";
 import { BlurFade } from "@/components/magicui/blur-fade";
+import { AuthContext } from "@/contex/AuthContext";
 function Settings() {
   const { assistant, setAssistant } = useContext(AssistantContext);
+  const { user } = useContext(AuthContext);
   const updateAssistant = useMutation(api.userAiAssistants.updateUserAssistant);
   const deleteUserAssistant = useMutation(
     api.userAiAssistants.deleteUserAssistant
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Auto-set default model if assistant doesn't have one
+  useEffect(() => {
+    if (
+      assistant &&
+      (!assistant.aiModelId ||
+        !AiModelOptions.some((m) => m.OpenRouter === assistant.aiModelId))
+    ) {
+      console.log(
+        "Assistant missing valid model, setting default:",
+        "deepseek/deepseek-r1:free"
+      );
+      setAssistant((prev: any) => ({
+        ...prev,
+        aiModelId: "deepseek/deepseek-r1:free",
+      }));
+    }
+  }, [assistant?._id]); // Run when assistant changes
   const onHandleInputChange = (field: string, value: string) => {
+    console.log("Input change:", field, value); // Debug log
     setAssistant((prev: any) => ({
       ...prev,
       [field]: value,
@@ -56,24 +77,33 @@ function Settings() {
     setAssistant(null);
   };
   // Find the selected model object
-  const defaultModelValue = "google/gemini-2.0-flash-exp:free";
-  // Fallback: if aiModelId is the display name, use the OpenRouter value
-  let selectedModelValue = assistant?.aiModelId || defaultModelValue;
-  // If the value is the display name, map it to OpenRouter value
-  const displayNameToOpenRouter = (name: string) => {
-    const found = AiModelOptions.find((m) => m.name === name);
-    return found ? found.OpenRouter : name;
-  };
+  const defaultModelValue = "deepseek/deepseek-r1:free";
+  // Ensure we always have a valid model value
+  let selectedModelValue = assistant?.aiModelId;
+
+  // Debug logging
+  console.log("Assistant data:", assistant);
+  console.log("Original aiModelId:", assistant?.aiModelId);
+  console.log(
+    "Available models:",
+    AiModelOptions.map((m) => ({ name: m.name, OpenRouter: m.OpenRouter }))
+  );
+
+  // If no model is set or model is invalid, use default
   if (
-    selectedModelValue &&
+    !selectedModelValue ||
     !AiModelOptions.some((m) => m.OpenRouter === selectedModelValue)
   ) {
-    // Try to map display name to OpenRouter value
-    selectedModelValue = displayNameToOpenRouter(selectedModelValue);
+    selectedModelValue = defaultModelValue;
+    console.log("Using default model:", selectedModelValue);
   }
+
   const selectedModel = AiModelOptions.find(
     (model) => model.OpenRouter === selectedModelValue
   );
+
+  console.log("Final selected model:", selectedModel);
+  console.log("Final selected model value:", selectedModelValue);
 
   return (
     assistant && (
@@ -116,11 +146,22 @@ function Settings() {
               onValueChange={(value) => onHandleInputChange("aiModelId", value)}
             >
               <SelectTrigger className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 cursor-pointer">
-                <SelectValue
-                  placeholder={
-                    selectedModel ? selectedModel.name : "Select Model"
-                  }
-                />
+                <SelectValue placeholder="Select Model">
+                  {selectedModel ? (
+                    <div className="flex items-center gap-2">
+                      <Image
+                        src={selectedModel.logo}
+                        alt="model_img"
+                        width={20}
+                        height={20}
+                        className="rounded-xl h-5 w-5 object-cover"
+                      />
+                      <span>{selectedModel.name}</span>
+                    </div>
+                  ) : (
+                    "Select Model"
+                  )}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {AiModelOptions.map((model, index) => (
@@ -176,6 +217,7 @@ function Settings() {
             />
           </BlurFade>
         </div>
+
         <div className="flex right-5 gap-5 absolute bottom-10">
           <ConfermationAlert
             OnDelete={OnDelete}

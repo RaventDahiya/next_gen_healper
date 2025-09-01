@@ -8,8 +8,8 @@ export const InsertSelectedAssistants = mutation({
   },
   handler: async (ctx, args) => {
     const insertedIds = [];
-    // Default to OpenRouter value for Gemini 2.0 Flash
-    const defaultModelValue = "google/gemini-2.0-flash-exp:free";
+    // Default to DeepSeek R1 as it's more reliable
+    const defaultModelValue = "deepseek/deepseek-r1:free";
     for (const record of args.records) {
       // Check if assistant with same id and uid already exists
       const existing = await ctx.db
@@ -44,6 +44,35 @@ export const GetAllUserAssistants = query({
       .filter((q) => q.eq(q.field("uid"), args.uid))
       .collect();
     return result;
+  },
+});
+
+export const GetAssistantById = query({
+  args: {
+    assistantId: v.id("userAiAssistants"),
+  },
+  handler: async (ctx, args) => {
+    const assistant = await ctx.db.get(args.assistantId);
+    return assistant;
+  },
+});
+
+export const GetAssistantByCustomId = query({
+  args: {
+    customId: v.string(),
+    uid: v.id("user"),
+  },
+  handler: async (ctx, args) => {
+    const assistant = await ctx.db
+      .query("userAiAssistants")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("uid"), args.uid),
+          q.eq(q.field("id"), args.customId)
+        )
+      )
+      .first();
+    return assistant;
   },
 });
 
@@ -86,8 +115,7 @@ export const CreateUserAssistant = mutation({
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 8);
     const customId = `custom_${timestamp}_${random}`;
-    const defaultModelValue =
-      args.aiModelId || "google/gemini-2.0-flash-exp:free";
+    const defaultModelValue = args.aiModelId || "deepseek/deepseek-r1:free";
 
     const insertedId = await ctx.db.insert("userAiAssistants", {
       id: customId,

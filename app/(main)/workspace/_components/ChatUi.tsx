@@ -3,10 +3,12 @@ import React, { useContext, useState, useRef, useEffect } from "react";
 import EmptyChatSpace from "./EmptyChatSpace";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send, Bot } from "lucide-react";
+import { Send, Bot, AlertTriangle, Crown, X } from "lucide-react";
 import AiModelOptions from "@/services/AiModelOptions";
 import { AssistantContext } from "@/contex/AssistantContext";
 import { AuthContext } from "@/contex/AuthContext";
+import { useTokenContext } from "@/contex/TokenContext";
+import UpgradePrompt from "./UpgradePrompt";
 import axios from "axios";
 import Image from "next/image";
 
@@ -15,9 +17,11 @@ function ChatUi() {
   const [isLoading, setIsLoading] = useState(false);
   const { assistant } = useContext(AssistantContext);
   const { user } = useContext(AuthContext);
+  const { userCredits, canSendMessage, refreshCredits } = useTokenContext();
   const [messages, setMessages] = useState<{ role: string; content: string }[]>(
     []
   );
+  const [showUpgradeMessage, setShowUpgradeMessage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -32,11 +36,49 @@ function ChatUi() {
     setMessages([]);
   }, [assistant?.id]);
 
+  // Auto-show upgrade message when credits are very low or exhausted
+  useEffect(() => {
+    if (!user?.orderId && userCredits <= 100 && userCredits >= 0) {
+      setShowUpgradeMessage(true);
+    }
+  }, [userCredits, user?.orderId]);
+
   const onMessageSend = async () => {
     if (!input.trim() || !assistant?.aiModelId) {
       console.log("Missing input or model");
       return;
     }
+
+    // Enhanced credit checking with debugging
+    console.log(
+      "Credit check - User:",
+      user?.orderId ? "Pro" : "Free",
+      "Credits:",
+      userCredits
+    );
+
+    // Check if user can send message (enhanced check)
+    if (!user?.orderId && userCredits <= 10) {
+      console.log(
+        "User has insufficient credits:",
+        userCredits,
+        "showing upgrade message"
+      );
+      setShowUpgradeMessage(true);
+      return;
+    }
+
+    // Double check with canSendMessage function
+    if (!canSendMessage()) {
+      console.log("canSendMessage returned false, credits:", userCredits);
+      setShowUpgradeMessage(true);
+      return;
+    }
+
+    console.log(
+      "Proceeding with message send, user has sufficient credits:",
+      userCredits
+    );
 
     try {
       setIsLoading(true);
@@ -44,26 +86,61 @@ function ChatUi() {
       const userInput = input;
       setInput("");
 
-      // Send the conversation history for context
+      // Send the conversation history for context along with assistant ID
       const result = await axios.post("/api/chat", {
         provider: assistant.aiModelId,
         userInput: userInput,
         conversationHistory: messages, // Send all previous messages for context
+        assistantId: assistant._id || assistant.id, // Pass the assistant ID to get instructions
+        userId: user?._id, // Pass user ID for assistant lookup
       });
 
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: result.data.message },
       ]);
-    } catch (error) {
+
+      // Refresh credits after successful message
+      await refreshCredits();
+    } catch (error: any) {
       console.error("Error sending message:", error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "Sorry, I encountered an error. Please try again.",
-        },
-      ]);
+
+      // Handle insufficient credits error
+      if (error.response?.data?.error === "insufficient_credits") {
+        setShowUpgradeMessage(true);
+        setMessages((prev) => prev.slice(0, -1)); // Remove user message
+        // Refresh credits to get updated count
+        await refreshCredits();
+      } else {
+        // Get error message from response if available
+        const errorMessage =
+          error.response?.data?.error ||
+          error.response?.data?.details ||
+          "Sorry, I encountered an error. Please try again.";
+
+        const errorCode = error.response?.data?.errorCode;
+        const provider = error.response?.data?.provider;
+
+        let displayMessage = errorMessage;
+
+        // Provide more specific error messages
+        if (provider && provider.includes("gemini")) {
+          displayMessage = `The Google Gemini model is currently unavailable. Please try selecting a different AI model from the dropdown above. Error: ${errorMessage}`;
+        } else if (errorCode === "404") {
+          displayMessage = `The selected AI model is not available. Please try a different model. Error: ${errorMessage}`;
+        } else if (errorCode === "429") {
+          displayMessage =
+            "Rate limit exceeded. Please wait a moment and try again.";
+        }
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: displayMessage,
+          },
+        ]);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -173,20 +250,41 @@ function ChatUi() {
 
       {/* Input Area */}
       <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
+        {/* Upgrade Message */}
+        <UpgradePrompt
+          show={showUpgradeMessage && !user?.orderId}
+          onClose={() => setShowUpgradeMessage(false)}
+          onUpgrade={() => {
+            // TODO: Add upgrade functionality
+            console.log("Upgrade clicked from chat");
+          }}
+          userCredits={userCredits}
+        />
+
+        {showUpgradeMessage && !user?.orderId && <div className="mb-4" />}
+
         <div className="flex gap-3 max-w-4xl mx-auto">
           <Input
-            placeholder={`Message ${assistant?.name || "AI Assistant"}...`}
+            placeholder={
+              !user?.orderId && userCredits <= 10
+                ? "Upgrade to Pro to continue chatting..."
+                : `Message ${assistant?.name || "AI Assistant"}...`
+            }
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) =>
               e.key === "Enter" && !e.shiftKey && onMessageSend()
             }
-            disabled={isLoading}
-            className="flex-1 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-full px-4 py-3"
+            disabled={isLoading || (!user?.orderId && userCredits <= 10)}
+            className="flex-1 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-full px-4 py-3 disabled:opacity-50"
           />
           <Button
             onClick={onMessageSend}
-            disabled={isLoading || !input.trim()}
+            disabled={
+              isLoading ||
+              !input.trim() ||
+              (!user?.orderId && userCredits <= 10)
+            }
             className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 dark:disabled:bg-gray-600 transition-colors rounded-full px-6"
           >
             <Send className="w-4 h-4" />

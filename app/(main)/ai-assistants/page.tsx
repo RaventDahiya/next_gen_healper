@@ -3,14 +3,15 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import AiAssistantsList from "@/services/AiAssistantsList";
 import Image from "next/image";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { BlurFade } from "@/components/magicui/blur-fade";
 import { RainbowButton } from "@/components/magicui/rainbow-button";
-import { useConvex, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { AuthContext } from "@/contex/AuthContext";
 import { Loader2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { setAssistantCache } from "@/lib/assistantCache";
 export type ASSISTANT = {
   id: number | string; // Support both number and string IDs
   name: string;
@@ -28,25 +29,6 @@ export default function AIAssistants() {
     api.userAiAssistants.InsertSelectedAssistants
   );
   const { user } = useContext(AuthContext);
-  const convex = useConvex();
-  useEffect(() => {
-    user && GetAllUserAssistants();
-  }, [user]);
-
-  const GetAllUserAssistants = async () => {
-    if (!user || !user._id) return;
-    const result = await convex.query(
-      api.userAiAssistants.GetAllUserAssistants,
-      {
-        uid: user._id,
-      }
-    );
-    console.log(result);
-    if (result.length > 0) {
-      router.replace("/workspace");
-      return;
-    }
-  };
 
   const onSelect = (assistant: ASSISTANT) => {
     const item = selectedAssistants?.find(
@@ -81,6 +63,10 @@ export default function AIAssistants() {
         uid: user._id,
       });
       console.log(result);
+
+      // Update the cached assistant status since user now has assistants
+      setAssistantCache(user._id, true);
+
       router.push("/workspace");
     } finally {
       setLoading(false);

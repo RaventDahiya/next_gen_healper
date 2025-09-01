@@ -200,7 +200,7 @@ const AddAssistantDialog: React.FC<AddAssistantDialogProps> = ({
             (q) => q.trim() !== ""
           ),
           aiModelId:
-            customAssistant.selectedModel || "google/gemini-2.0-flash-exp:free",
+            customAssistant.selectedModel || "deepseek/deepseek-r1:free",
         });
 
         console.log("Custom assistant created with result:", result);

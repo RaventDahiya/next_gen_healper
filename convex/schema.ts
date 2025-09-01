@@ -6,8 +6,10 @@ export default defineSchema({
     name: v.string(),
     email: v.string(),
     picture: v.string(),
-    credits: v.number(),
+    credits: v.number(), // Remaining tokens
     orderId: v.optional(v.string()),
+    tokensUsed: v.optional(v.number()), // Total tokens used this month
+    lastResetDate: v.optional(v.string()), // For monthly reset tracking
   }),
   userAiAssistants: defineTable({
     uid: v.id("user"),

@@ -1,32 +1,38 @@
 export default [
   {
     id: 1,
-    name: "OpenAI: gpt-oss-20b",
-    OpenRouter: "openai/gpt-oss-20b:free",
-    logo: "/chatgpt.png",
-  },
-  {
-    id: 2,
-    name: "Google: Gemini 2.0 Flash",
-    OpenRouter: "google/gemini-2.0-flash-exp:free",
-    logo: "/gemini.webp",
-  },
-  {
-    id: 3,
     name: "DeepSeek: R1",
     OpenRouter: "deepseek/deepseek-r1:free",
     logo: "/deepseek.png",
   },
   {
+    id: 2,
+    name: "OpenAI: GPT-4o Mini",
+    OpenRouter: "openai/gpt-4o-mini:free",
+    logo: "/chatgpt.png",
+  },
+  {
+    id: 3,
+    name: "Google: Gemini Flash 1.5 8B",
+    OpenRouter: "google/gemini-flash-1.5-8b:free",
+    logo: "/gemini.webp",
+  },
+  {
     id: 4,
-    name: "Google: Gemma 3 27B",
-    OpenRouter: "google/gemma-3-27b-it:free",
-    logo: "/google.png",
+    name: "Google: Gemini Flash 1.5",
+    OpenRouter: "google/gemini-flash-1.5:free",
+    logo: "/gemini.webp",
   },
   {
     id: 5,
-    name: "Qwen: Qwen2.5 VL 72B Instruct",
-    OpenRouter: "qwen/qwen2.5-vl-72b-instruct:free",
+    name: "Google: Gemma 2 27B",
+    OpenRouter: "google/gemma-2-27b-it:free",
+    logo: "/google.png",
+  },
+  {
+    id: 6,
+    name: "Qwen: Qwen2.5 72B Instruct",
+    OpenRouter: "qwen/qwen-2.5-72b-instruct:free",
     logo: "/qwen.png",
   },
 ];

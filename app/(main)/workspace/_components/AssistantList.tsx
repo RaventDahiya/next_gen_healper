@@ -11,8 +11,20 @@ import { ASSISTANT } from "../../ai-assistants/page";
 import Image from "next/image";
 import { AssistantContext } from "@/contex/AssistantContext";
 import { BlurFade } from "@/components/magicui/blur-fade";
-import { Search, X } from "lucide-react";
+import { LogOut, Search, UserCircle2, X, Zap } from "lucide-react";
 import AddAssistantDialog from "./AddAssistantDialog";
+import UpgradePrompt from "./UpgradePrompt";
+import { useTokenContext } from "@/contex/TokenContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import Profile from "./profile";
+import { clearAssistantCache } from "@/lib/assistantCache";
 
 function AssistantList() {
   const [assistantList, setAssistantList] = useState<ASSISTANT[]>([]);
@@ -23,7 +35,19 @@ function AssistantList() {
   const { user } = useContext(AuthContext);
   const convex = useConvex();
   const { assistant, setAssistant } = useContext(AssistantContext);
+  const [openProfileDialog, setOpenProfileDialog] = useState(false);
+  const { userCredits, canSendMessage } = useTokenContext();
+  const [showCreditsWarning, setShowCreditsWarning] = useState(false);
 
+  const handleLogout = () => {
+    localStorage.removeItem("user_token");
+    // Clear assistant cache when logging out
+    if (user?._id) {
+      clearAssistantCache(user._id);
+    }
+    router.push("/");
+    window.location.reload();
+  };
   useEffect(() => {
     user && GetAllUserAssistants();
   }, [user && assistant == null]);
@@ -115,10 +139,27 @@ function AssistantList() {
   };
 
   return (
-    <div className="p-5 bg-gray-100 dark:bg-gray-800 border-r-[1px] h-full relative">
+    <div className="p-5 pb-8 bg-gray-100 dark:bg-gray-800 border-r-[1px] h-full relative">
       <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
         Your Personal AI Assistants
       </h2>
+
+      {/* Credits Warning for Free Plan */}
+      {!user?.orderId && userCredits < 1000 && (
+        <div className="mb-4">
+          <UpgradePrompt
+            show={true}
+            compact={true}
+            onClose={() => setShowCreditsWarning(false)}
+            onUpgrade={() => {
+              // TODO: Add upgrade functionality
+              console.log("Upgrade clicked from sidebar");
+            }}
+            userCredits={userCredits}
+            message={`Only ${userCredits.toLocaleString()} tokens left!`}
+          />
+        </div>
+      )}
 
       <Button
         className="w-full bg-blue-500 hover:bg-blue-700 cursor-pointer transition duration-200 ease-in-out"
@@ -248,25 +289,52 @@ function AssistantList() {
           })
         )}
       </div>
-
-      <div className="mt-5 p-3 rounded-xl bg-white dark:bg-gray-700 shadow-md flex items-center gap-4">
-        <Image
-          src={user?.picture || "/logo.svg"}
-          alt="user_img"
-          width={40}
-          height={40}
-          className="rounded-full object-cover"
-        />
-        <div>
-          <h3 className="font-semibold text-gray-800 dark:text-gray-200">
-            {user?.name}
-          </h3>
-          <p className="text-gray-600 dark:text-gray-300 text-sm">
-            {user?.orderId ? "Pro Plan" : "Free Plan"}
-          </p>
-        </div>
-      </div>
-
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <div className="mt-5 p-3 rounded-xl bg-white dark:bg-gray-700 shadow-md flex items-center gap-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200">
+            <Image
+              src={user?.picture || "/logo.svg"}
+              alt="user_img"
+              width={40}
+              height={40}
+              className="rounded-full object-cover"
+            />
+            <div>
+              <h3 className="font-semibold text-gray-800 dark:text-gray-200">
+                {user?.name}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
+                {user?.orderId ? "Pro Plan" : "Free Plan"}
+              </p>
+              <div className="flex items-center gap-1 mt-1">
+                <Zap className="h-3 w-3 text-blue-500" />
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  {userCredits.toLocaleString()} tokens
+                </span>
+              </div>
+            </div>
+          </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-[200px]">
+          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => setOpenProfileDialog(true)}
+            className="cursor-pointer"
+          >
+            <UserCircle2 className="mr-2 h-4 w-4" />
+            Profile
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <Profile
+        openDialog={openProfileDialog}
+        onClose={() => setOpenProfileDialog(false)}
+      />
       <AddAssistantDialog
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
