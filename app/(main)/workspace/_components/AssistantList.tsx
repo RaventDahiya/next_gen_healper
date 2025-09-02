@@ -73,7 +73,6 @@ function AssistantList() {
         uid: user._id,
       }
     );
-    console.log(result);
     const convertedResult = result.map((assistant: any) => ({
       ...assistant,
       id: assistant.id, // Keep original ID (string or number)
@@ -83,7 +82,6 @@ function AssistantList() {
 
   const handleAssistantSelect = (selectedAssistant: ASSISTANT) => {
     setAssistant(selectedAssistant);
-    console.log("Selected assistant:", selectedAssistant); // Debug log
   };
 
   const handleAddAssistant = () => {
@@ -91,7 +89,6 @@ function AssistantList() {
   };
 
   const handleAssistantAdded = () => {
-    console.log("handleAssistantAdded called - refreshing assistant list");
     GetAllUserAssistants(); // Refresh the list
   };
 
@@ -153,7 +150,6 @@ function AssistantList() {
             onClose={() => setShowCreditsWarning(false)}
             onUpgrade={() => {
               // TODO: Add upgrade functionality
-              console.log("Upgrade clicked from sidebar");
             }}
             userCredits={userCredits}
             message={`Only ${userCredits.toLocaleString()} tokens left!`}

@@ -182,14 +182,6 @@ const AddAssistantDialog: React.FC<AddAssistantDialogProps> = ({
           return;
         }
 
-        console.log("Creating custom assistant with data:", {
-          name: customAssistant.name,
-          title: customAssistant.title,
-          instruction: customAssistant.instruction,
-          image: customAssistant.image || "/logo.svg",
-          selectedModel: customAssistant.selectedModel,
-        });
-
         const result = await createCustomAssistant({
           uid: user._id,
           name: customAssistant.name,
@@ -203,7 +195,6 @@ const AddAssistantDialog: React.FC<AddAssistantDialogProps> = ({
             customAssistant.selectedModel || "deepseek/deepseek-r1:free",
         });
 
-        console.log("Custom assistant created with result:", result);
         toast.success("Custom assistant created successfully!");
       }
 

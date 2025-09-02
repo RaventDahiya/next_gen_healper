@@ -27,8 +27,6 @@ export default function SignIn() {
         picture: userData?.picture,
       });
 
-      console.log("login success", result);
-
       // Update context with user data
       setUser({
         name: userData?.name,

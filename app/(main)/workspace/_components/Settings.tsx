@@ -41,10 +41,6 @@ function Settings() {
       (!assistant.aiModelId ||
         !AiModelOptions.some((m) => m.OpenRouter === assistant.aiModelId))
     ) {
-      console.log(
-        "Assistant missing valid model, setting default:",
-        "deepseek/deepseek-r1:free"
-      );
       setAssistant((prev: any) => ({
         ...prev,
         aiModelId: "deepseek/deepseek-r1:free",
@@ -52,7 +48,6 @@ function Settings() {
     }
   }, [assistant?._id]); // Run when assistant changes
   const onHandleInputChange = (field: string, value: string) => {
-    console.log("Input change:", field, value); // Debug log
     setAssistant((prev: any) => ({
       ...prev,
       [field]: value,
@@ -81,29 +76,17 @@ function Settings() {
   // Ensure we always have a valid model value
   let selectedModelValue = assistant?.aiModelId;
 
-  // Debug logging
-  console.log("Assistant data:", assistant);
-  console.log("Original aiModelId:", assistant?.aiModelId);
-  console.log(
-    "Available models:",
-    AiModelOptions.map((m) => ({ name: m.name, OpenRouter: m.OpenRouter }))
-  );
-
   // If no model is set or model is invalid, use default
   if (
     !selectedModelValue ||
     !AiModelOptions.some((m) => m.OpenRouter === selectedModelValue)
   ) {
     selectedModelValue = defaultModelValue;
-    console.log("Using default model:", selectedModelValue);
   }
 
   const selectedModel = AiModelOptions.find(
     (model) => model.OpenRouter === selectedModelValue
   );
-
-  console.log("Final selected model:", selectedModel);
-  console.log("Final selected model value:", selectedModelValue);
 
   return (
     assistant && (

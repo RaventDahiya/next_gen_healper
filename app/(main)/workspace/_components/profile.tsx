@@ -151,7 +151,6 @@ function Profile({ openDialog, onClose }: any) {
                         className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-2 px-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer"
                         onClick={() => {
                           // TODO: Add upgrade functionality
-                          console.log("Upgrade button clicked");
                         }}
                       >
                         <Crown className="h-4 w-4 mr-2" />

@@ -62,7 +62,6 @@ export default function AIAssistants() {
         })),
         uid: user._id,
       });
-      console.log(result);
 
       // Update the cached assistant status since user now has assistants
       setAssistantCache(user._id, true);

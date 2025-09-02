@@ -31,14 +31,6 @@ export async function POST(req: NextRequest) {
 
     provider = requestProvider; // Assign the actual provider value
 
-    console.log("API Request received:", {
-      provider,
-      userInput,
-      conversationHistory,
-      assistantId,
-      userId,
-    });
-
     if (!provider || !userInput || !userId) {
       return NextResponse.json(
         { error: "Provider, userInput, and userId are required" },
@@ -97,7 +89,6 @@ export async function POST(req: NextRequest) {
           );
         } catch (convexIdError) {
           // If that fails, try to get by custom ID
-          console.log("Trying custom ID lookup...");
           assistant = await convex.query(
             api.userAiAssistants.GetAssistantByCustomId,
             {
@@ -115,7 +106,6 @@ export async function POST(req: NextRequest) {
               content: instruction,
             };
           }
-          console.log("Assistant instruction applied:", instruction);
         } else {
           console.warn("Assistant not found with ID:", assistantId);
         }
@@ -153,12 +143,6 @@ export async function POST(req: NextRequest) {
       content: userInput,
     });
 
-    console.log(
-      "Messages being sent to OpenAI:",
-      JSON.stringify(messages, null, 2)
-    );
-    console.log("Using model:", provider);
-
     // Add specific handling for different model types
     let modelConfig = {
       model: provider,
@@ -168,15 +152,12 @@ export async function POST(req: NextRequest) {
 
     // Special handling for Gemini models which might need different parameters
     if (provider.includes("gemini")) {
-      console.log("Detected Gemini model, using specific configuration");
       modelConfig = {
         model: provider,
         messages: messages,
         max_tokens: 800, // Gemini might have different token limits
       };
     }
-
-    console.log("Model configuration:", modelConfig);
 
     let completion;
     try {
@@ -186,7 +167,6 @@ export async function POST(req: NextRequest) {
 
       // If Gemini model fails, provide more specific error information
       if (provider.includes("gemini")) {
-        console.log("Gemini model failed, error:", modelError.message);
         throw new Error(
           `Gemini model (${provider}) is currently unavailable: ${modelError.message}`
         );
@@ -208,21 +188,9 @@ export async function POST(req: NextRequest) {
         userId: userId,
         tokensUsed: totalTokensUsed,
       });
-
-      console.log("Credits updated:", updateResult);
     } catch (error) {
       console.error("Error updating user credits:", error);
     }
-
-    console.log("OpenAI response:", result);
-    console.log(
-      "Tokens used - Input:",
-      inputTokens,
-      "Output:",
-      outputTokens,
-      "Total:",
-      totalTokensUsed
-    );
 
     return NextResponse.json({
       message: result,

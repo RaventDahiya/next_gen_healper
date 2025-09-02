@@ -92,22 +92,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     try {
       const token = localStorage.getItem("user_token");
-      console.log("Token from localStorage:", token);
       if (!token) {
-        console.log("No token found, setting user to null");
         setUser(null);
         setIsLoading(false);
         return;
       }
 
-      console.log("Fetching user data with token");
       const userData = await GetAuthUserData(
         token,
         abortControllerRef.current.signal
       );
-      console.log("User data from Google:", userData);
       if (userData?.email) {
-        console.log("Setting user with Google data");
         // Get or create user in Convex to ensure we have the _id
         try {
           const convexUser = await getOrCreateUserInConvex({
@@ -116,7 +111,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             picture: userData.picture,
           });
 
-          console.log("Setting user with Convex data:", convexUser);
           setUser({
             _id: convexUser._id,
             name: userData.name,
@@ -134,31 +128,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       } else {
         // If we get here, the token is invalid or expired
-        console.log(
-          "No email in user data, removing token and setting user to null"
-        );
         localStorage.removeItem("user_token");
         setUser(null);
       }
     } catch (error: any) {
       // Don't treat cancellation as an error
       if (error?.name === "AbortError" || error?.code === "ERR_CANCELED") {
-        console.log("Request was cancelled");
         return;
       }
 
       console.error("Auth check failed:", error);
       // If we get a 401 error, the token is expired or invalid
       if (error?.response?.status === 401) {
-        console.log("401 error, removing token and setting user to null");
         localStorage.removeItem("user_token");
         setUser(null);
       }
       // For other errors (network issues, timeouts, etc.),
       // we don't change the user state to maintain login
-      console.log("Other error, keeping current user state");
     } finally {
-      console.log("Finished auth check, setting isLoading to false");
       setIsLoading(false);
     }
   };

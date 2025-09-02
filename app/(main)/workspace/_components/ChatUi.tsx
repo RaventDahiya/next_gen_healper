@@ -45,40 +45,20 @@ function ChatUi() {
 
   const onMessageSend = async () => {
     if (!input.trim() || !assistant?.aiModelId) {
-      console.log("Missing input or model");
       return;
     }
 
-    // Enhanced credit checking with debugging
-    console.log(
-      "Credit check - User:",
-      user?.orderId ? "Pro" : "Free",
-      "Credits:",
-      userCredits
-    );
-
     // Check if user can send message (enhanced check)
     if (!user?.orderId && userCredits <= 10) {
-      console.log(
-        "User has insufficient credits:",
-        userCredits,
-        "showing upgrade message"
-      );
       setShowUpgradeMessage(true);
       return;
     }
 
     // Double check with canSendMessage function
     if (!canSendMessage()) {
-      console.log("canSendMessage returned false, credits:", userCredits);
       setShowUpgradeMessage(true);
       return;
     }
-
-    console.log(
-      "Proceeding with message send, user has sufficient credits:",
-      userCredits
-    );
 
     try {
       setIsLoading(true);
@@ -256,7 +236,6 @@ function ChatUi() {
           onClose={() => setShowUpgradeMessage(false)}
           onUpgrade={() => {
             // TODO: Add upgrade functionality
-            console.log("Upgrade clicked from chat");
           }}
           userCredits={userCredits}
         />
