@@ -64,10 +64,13 @@ function Header() {
     return (
       <header className="fixed top-0 left-0 right-0 h-20 flex items-center justify-between px-6 shadow-sm bg-white dark:bg-gray-900 z-50 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center py-2">
-          <img
+          <Image
             src="/nextgenhelper_ai_logo.png"
             alt="NextGenHelper AI Assistant"
-            className="h-50 w-auto object-contain"
+            width={130}
+            height={48}
+            className="h-12 w-auto object-contain"
+            priority
           />
         </div>
 
@@ -101,10 +104,13 @@ function Header() {
     return (
       <header className="fixed top-0 left-0 right-0 h-20 flex items-center justify-between px-6 shadow-sm bg-white dark:bg-gray-900 z-50 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center py-2">
-          <img
+          <Image
             src="/nextgenhelper_ai_logo.png"
             alt="NextGenHelper AI Assistant"
-            className="h-50 w-auto object-contain"
+            width={130}
+            height={48}
+            className="h-12 w-auto object-contain"
+            priority
           />
         </div>
         <div className="flex items-center space-x-4">
@@ -138,10 +144,13 @@ function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 h-20 flex items-center justify-between px-6 shadow-sm bg-white dark:bg-gray-900 z-50 border-b border-gray-200 dark:border-gray-700">
       <div className="flex items-center py-2">
-        <img
+        <Image
           src="/nextgenhelper_ai_logo.png"
           alt="NextGenHelper AI Assistant"
-          className="h-50 w-auto object-contain"
+          width={130}
+          height={48}
+          className="h-12 w-auto object-contain"
+          priority
         />
       </div>
       <div className="flex items-center space-x-4">

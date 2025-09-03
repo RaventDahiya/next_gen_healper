@@ -3,6 +3,8 @@ import OpenAI from "openai";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import { formatAssistantInstruction } from "@/lib/assistantUtils";
+import { rateLimit } from "@/lib/rateLimiter";
+import { handleError, sanitizeError } from "@/lib/errorHandler";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
@@ -30,6 +32,15 @@ export async function POST(req: NextRequest) {
     } = await req.json();
 
     provider = requestProvider; // Assign the actual provider value
+
+    // Add rate limiting
+    if (!rateLimit(userId || "anonymous", 20, 60000)) {
+      // 20 requests per minute
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
 
     if (!provider || !userInput || !userId) {
       return NextResponse.json(
@@ -236,10 +247,17 @@ export async function POST(req: NextRequest) {
       errorMessage = `Model error: ${error.message}`;
     }
 
+    // Log the error for debugging
+    handleError(error, `Chat API - Provider: ${provider}`);
+
     return NextResponse.json(
       {
-        error: errorMessage,
-        details: error.message,
+        error:
+          process.env.NODE_ENV === "production"
+            ? sanitizeError(error)
+            : errorMessage,
+        details:
+          process.env.NODE_ENV === "production" ? undefined : error.message,
         provider: provider,
         errorCode: error.status || "unknown",
       },

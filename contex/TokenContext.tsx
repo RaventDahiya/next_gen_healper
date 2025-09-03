@@ -83,7 +83,7 @@ export const TokenProvider = ({ children }: { children: React.ReactNode }) => {
     } else {
       setIsLoading(false);
     }
-  }, [user?._id, user?.email]);
+  }, [user?._id, user?.email, user?.orderId, user?.subscriptionId]);
 
   return (
     <TokenContext.Provider

@@ -55,6 +55,7 @@ interface User {
   email?: string;
   picture?: string;
   orderId?: string;
+  subscriptionId?: string;
 }
 
 interface AuthContextType {
@@ -62,6 +63,7 @@ interface AuthContextType {
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
   isLoading: boolean;
   checkAuth: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -69,6 +71,7 @@ export const AuthContext = createContext<AuthContextType>({
   setUser: () => {},
   isLoading: true,
   checkAuth: async () => {},
+  refreshUser: async () => {},
 });
 
 interface AuthProviderProps {
@@ -111,11 +114,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             picture: userData.picture,
           });
 
+          // Set user with complete Convex data including orderId and subscriptionId
           setUser({
             _id: convexUser._id,
-            name: userData.name,
-            email: userData.email,
-            picture: userData.picture,
+            name: convexUser.name || userData.name,
+            email: convexUser.email || userData.email,
+            picture: convexUser.picture || userData.picture,
+            orderId: convexUser.orderId,
+            subscriptionId: convexUser.subscriptionId,
           });
         } catch (error) {
           console.error("Failed to get or create user in Convex:", error);
@@ -159,6 +165,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
   }, []);
 
+  const refreshUser = async () => {
+    if (!user?.email) return;
+
+    try {
+      // Refresh user data from Convex
+      const convexUser = await getOrCreateUserInConvex({
+        name: user.name || "",
+        email: user.email,
+        picture: user.picture || "",
+      });
+
+      // Update user with fresh Convex data
+      setUser({
+        _id: convexUser._id,
+        name: convexUser.name || user.name,
+        email: convexUser.email || user.email,
+        picture: convexUser.picture || user.picture,
+        orderId: convexUser.orderId,
+        subscriptionId: convexUser.subscriptionId,
+      });
+    } catch (error) {
+      console.error("Failed to refresh user data:", error);
+    }
+  };
+
   useEffect(() => {
     checkAuth();
   }, []);
@@ -168,6 +199,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser,
     isLoading,
     checkAuth,
+    refreshUser,
   };
 
   return (

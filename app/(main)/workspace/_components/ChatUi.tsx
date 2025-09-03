@@ -9,6 +9,7 @@ import { AssistantContext } from "@/contex/AssistantContext";
 import { AuthContext } from "@/contex/AuthContext";
 import { useTokenContext } from "@/contex/TokenContext";
 import UpgradePrompt from "./UpgradePrompt";
+import { initiatePayment } from "@/lib/paymentUtils";
 import axios from "axios";
 import Image from "next/image";
 
@@ -22,6 +23,7 @@ function ChatUi() {
     []
   );
   const [showUpgradeMessage, setShowUpgradeMessage] = useState(false);
+  const [upgradeLoading, setUpgradeLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -234,10 +236,29 @@ function ChatUi() {
         <UpgradePrompt
           show={showUpgradeMessage && !user?.orderId}
           onClose={() => setShowUpgradeMessage(false)}
-          onUpgrade={() => {
-            // TODO: Add upgrade functionality
+          onUpgrade={async () => {
+            if (!user?._id || !user?.name || !user?.email) {
+              console.error("User information missing");
+              return;
+            }
+
+            await initiatePayment({
+              userId: user._id,
+              userName: user.name,
+              userEmail: user.email,
+              onSuccess: () => {
+                setShowUpgradeMessage(false);
+              },
+              onClose: () => {
+                console.log("Payment modal closed");
+              },
+              onLoadingChange: (loading) => {
+                setUpgradeLoading(loading);
+              },
+            });
           }}
           userCredits={userCredits}
+          loading={upgradeLoading}
         />
 
         {showUpgradeMessage && !user?.orderId && <div className="mb-4" />}

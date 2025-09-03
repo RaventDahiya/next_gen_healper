@@ -15,6 +15,7 @@ import { LogOut, Search, UserCircle2, X, Zap } from "lucide-react";
 import AddAssistantDialog from "./AddAssistantDialog";
 import UpgradePrompt from "./UpgradePrompt";
 import { useTokenContext } from "@/contex/TokenContext";
+import { initiatePayment } from "@/lib/paymentUtils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,6 +39,7 @@ function AssistantList() {
   const [openProfileDialog, setOpenProfileDialog] = useState(false);
   const { userCredits, canSendMessage } = useTokenContext();
   const [showCreditsWarning, setShowCreditsWarning] = useState(false);
+  const [upgradeLoading, setUpgradeLoading] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("user_token");
@@ -148,11 +150,30 @@ function AssistantList() {
             show={true}
             compact={true}
             onClose={() => setShowCreditsWarning(false)}
-            onUpgrade={() => {
-              // TODO: Add upgrade functionality
+            onUpgrade={async () => {
+              if (!user?._id || !user?.name || !user?.email) {
+                console.error("User information missing");
+                return;
+              }
+
+              await initiatePayment({
+                userId: user._id,
+                userName: user.name,
+                userEmail: user.email,
+                onSuccess: () => {
+                  setShowCreditsWarning(false);
+                },
+                onClose: () => {
+                  console.log("Payment modal closed");
+                },
+                onLoadingChange: (loading) => {
+                  setUpgradeLoading(loading);
+                },
+              });
             }}
             userCredits={userCredits}
             message={`Only ${userCredits.toLocaleString()} tokens left!`}
+            loading={upgradeLoading}
           />
         </div>
       )}

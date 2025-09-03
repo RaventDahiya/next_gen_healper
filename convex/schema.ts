@@ -8,6 +8,7 @@ export default defineSchema({
     picture: v.string(),
     credits: v.number(), // Remaining tokens
     orderId: v.optional(v.string()),
+    subscriptionId: v.optional(v.string()), // Razorpay subscription ID for cancellation
     tokensUsed: v.optional(v.number()), // Total tokens used this month
     lastResetDate: v.optional(v.string()), // For monthly reset tracking
   }),

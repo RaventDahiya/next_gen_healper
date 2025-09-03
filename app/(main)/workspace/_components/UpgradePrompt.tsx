@@ -10,6 +10,7 @@ interface UpgradePromptProps {
   message?: string;
   compact?: boolean;
   userCredits?: number; // Add this to determine the appropriate title
+  loading?: boolean;
 }
 
 function UpgradePrompt({
@@ -19,6 +20,7 @@ function UpgradePrompt({
   message = "You've used all your free plan tokens. Upgrade to Pro for 500,000 tokens/month.",
   compact = false,
   userCredits = 0,
+  loading = false,
 }: UpgradePromptProps) {
   if (!show) return null;
 
@@ -61,9 +63,10 @@ function UpgradePrompt({
               size="sm"
               className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
               onClick={onUpgrade}
+              disabled={loading}
             >
               <Crown className="h-3 w-3 mr-1" />
-              Upgrade
+              {loading ? "Processing..." : "Upgrade"}
             </Button>
             <Button
               variant="ghost"
@@ -98,9 +101,10 @@ function UpgradePrompt({
             size="sm"
             className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
             onClick={onUpgrade}
+            disabled={loading}
           >
             <Crown className="h-3 w-3 mr-1" />
-            Upgrade
+            {loading ? "Processing..." : "Upgrade"}
           </Button>
           <Button
             variant="ghost"

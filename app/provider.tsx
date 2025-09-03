@@ -5,6 +5,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { AuthProvider } from "@/contex/AuthContext";
 import { TokenProvider } from "@/contex/TokenContext";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 function Provider({
   children,
@@ -13,22 +14,24 @@ function Provider({
 }>) {
   const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
   return (
-    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
-      <ConvexProvider client={convex}>
-        <AuthProvider>
-          <TokenProvider>
-            <NextThemesProvider
-              attribute="class"
-              defaultTheme="light"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <div>{children}</div>
-            </NextThemesProvider>
-          </TokenProvider>
-        </AuthProvider>
-      </ConvexProvider>
-    </GoogleOAuthProvider>
+    <ErrorBoundary>
+      <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
+        <ConvexProvider client={convex}>
+          <AuthProvider>
+            <TokenProvider>
+              <NextThemesProvider
+                attribute="class"
+                defaultTheme="light"
+                enableSystem
+                disableTransitionOnChange
+              >
+                <div>{children}</div>
+              </NextThemesProvider>
+            </TokenProvider>
+          </AuthProvider>
+        </ConvexProvider>
+      </GoogleOAuthProvider>
+    </ErrorBoundary>
   );
 }
 
